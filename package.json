@@ -1,0 +1,25 @@
+{
+  "name": "finance-theme",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "lint": "composer run lint:php",
+    "fix": "composer run fix:php",
+    "prepare": "husky install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.com/d-alleyne/finance-compare/"
+  },
+  "keywords": [
+    "wordpress",
+    "theme"
+  ],
+  "author": "Damien Alleyne",
+  "license": "ISC",
+  "devDependencies": {
+    "@wordpress/stylelint-config": "^21.21.0",
+    "husky": "^8.0.0"
+  }
+}

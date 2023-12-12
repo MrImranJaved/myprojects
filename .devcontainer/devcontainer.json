@@ -1,0 +1,23 @@
+{
+  "name": "Financial Theme Container",
+  "dockerFile": "Dockerfile",
+
+  "settings": {
+    "terminal.integrated.shell.linux": "/bin/bash"
+  },
+
+  "extensions": [
+    "bmewburn.vscode-intelephense-client",
+    "dbaeumer.vscode-eslint",
+    "stylelint.vscode-stylelint",
+    "esbenp.prettier-vscode",
+    "tungvn.wordpress-snippet",
+    "eamodio.gitlens",
+    "shd101wyy.markdown-preview-enhanced",
+    "christian-kohler.npm-intellisense",
+    "ikappas.phpcs",
+    "ms-azuretools.vscode-docker"
+  ],
+
+  "postCreateCommand": "composer install && npm install && git config --local core.editor \"code --wait\""
+}

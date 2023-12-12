@@ -1,0 +1,4 @@
+<FilesMatch "(^\.|^#.*#|~$|composer\.(lock|json)|\.dist|node_modules|vendor|\.devcontainer|\.log|\.git|\.gitignore|\.gitlab-ci\.yml|README\.md|package\.(json|lock)|phpcs\.xml|\.nvmrc)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>

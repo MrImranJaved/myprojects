@@ -1,0 +1,92 @@
+# This file is a template, and might need editing before it works on your project.
+# This is a sample GitLab CI/CD configuration file that should run without any modifications.
+# It demonstrates a basic 3 stage CI/CD pipeline. Instead of real tests or scripts,
+# it uses echo commands to simulate the pipeline execution.
+#
+# A pipeline is composed of independent jobs that run scripts, grouped into stages.
+# Stages run in sequential order, but jobs within stages run in parallel.
+#
+# For more information, see: https://docs.gitlab.com/ee/ci/yaml/index.html#stages
+#
+# You can copy and paste this template into a new `.gitlab-ci.yml` file.
+# You should not add this template to an existing `.gitlab-ci.yml` file by using the `include:` keyword.
+#
+# To contribute improvements to CI/CD templates, please follow the Development guide at:
+# https://docs.gitlab.com/ee/development/cicd/templates.html
+# This specific template is located at:
+# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Getting-Started.gitlab-ci.yml
+
+stages:          # List of stages for jobs, and their order of execution
+  - lint
+#  - build
+  - deploy
+
+lint-job:
+  stage: lint
+  image: node:latest
+  before_script:
+    - apt-get update -qy
+    - apt-get install -y php php-xml php-curl unzip
+    - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+    - npm install
+  script:
+    - composer install
+    - composer update
+    - npm run lint
+  only:
+    - main
+    - staging   # Allow this job to run on staging branch as well
+
+#build-job:
+#  stage: build
+#  image: node:latest
+#  before_script:
+#    - npm install
+#  script:
+#    - npm run scss
+#  artifacts:
+#    paths:
+#      - css/custom-styles.css
+#  only:
+#    - main
+#    - staging   # Allow this job to run on staging branch as well
+
+deploy-job-staging:  # New job for deploying to staging
+  stage: deploy
+  only:
+    - staging
+  before_script:
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - eval $(ssh-agent -s)
+    - echo "$STAGING_DEPLOY_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan -p $STAGING_SSH_PORT $STAGING_SSH_HOST >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+  environment: staging
+  script:
+    - echo "Deploying to staging..."
+    - ssh $STAGING_SSH_USERNAME@$STAGING_SSH_HOST -p $STAGING_SSH_PORT "mkdir -p $STAGING_PROJECT_DIRECTORY/css && chmod 755 $STAGING_PROJECT_DIRECTORY/css"
+    - scp -P $STAGING_SSH_PORT css/custom-styles.css $STAGING_SSH_USERNAME@$STAGING_SSH_HOST:$STAGING_PROJECT_DIRECTORY/css/
+    - ssh $STAGING_SSH_USERNAME@$STAGING_SSH_HOST -p $STAGING_SSH_PORT "cd $STAGING_PROJECT_DIRECTORY && git checkout staging && git pull"
+    - echo "Application successfully deployed to staging."
+
+deploy-job:
+  stage: deploy
+  only:
+    - main
+  before_script:
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - eval $(ssh-agent -s)
+    - echo "$DEPLOY_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan -p $SSH_PORT $SSH_HOST >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+  environment: production
+  script:
+    - echo "Deploying application..."
+    - ssh $SSH_USERNAME@$SSH_HOST -p $SSH_PORT "mkdir -p $PROJECT_DIRECTORY/css && chmod 755 $PROJECT_DIRECTORY/css"
+    - scp -P $SSH_PORT css/custom-styles.css $SSH_USERNAME@$SSH_HOST:$PROJECT_DIRECTORY/css/
+    - ssh $SSH_USERNAME@$SSH_HOST -p $SSH_PORT "cd $PROJECT_DIRECTORY && git pull"
+    - echo "Application successfully deployed to production."

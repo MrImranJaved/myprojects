@@ -1,0 +1,14 @@
+# Handle line endings explicitly for files typically scanned by PHP_CodeSniffer
+* text=auto eol=lf
+*.php text eol=lf
+*.js text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+
+# Other file types - adjust as needed
+*.json text eol=lf
+*.xml text eol=lf
+*.md text eol=lf
+
+# Shell scripts always use LF.
+*.sh text eol=lf
